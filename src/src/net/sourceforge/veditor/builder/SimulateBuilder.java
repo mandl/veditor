@@ -89,7 +89,7 @@ public class SimulateBuilder extends IncrementalProjectBuilder
 					+  buildConfig.getCommand());
 			VerilogPlugin.println("----------------------------------------");
 			//kick off the launcher
-			ExternalLauncher launcher = new ExternalLauncher(folder, buildConfig.m_Command);
+			ExternalLauncher launcher = new ExternalLauncher(folder, buildConfig.m_Command,null);
 			launcher.start();
 			//monitor launcher
 			while(launcher.isAlive())
@@ -173,7 +173,7 @@ public class SimulateBuilder extends IncrementalProjectBuilder
 					+  buildConfig.getCleanCommand());
 			VerilogPlugin.println("----------------------------------------");
 			//kick off the launcher
-			ExternalLauncher launcher = new ExternalLauncher(folder, buildConfig.getCleanCommand());
+			ExternalLauncher launcher = new ExternalLauncher(folder, buildConfig.getCleanCommand(),null);
 			launcher.start();
 			//monitor launcher
 			while(launcher.isAlive())

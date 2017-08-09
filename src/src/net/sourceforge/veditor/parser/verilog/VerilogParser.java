@@ -900,6 +900,12 @@ public class VerilogParser extends VerilogParserCore implements IParser, Prefere
 			return VerilogPlugin.getPreferenceBoolean(key);
 		}
 	}
+
+	@Override
+	protected void parameterAssignment(String name, Expression value) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 

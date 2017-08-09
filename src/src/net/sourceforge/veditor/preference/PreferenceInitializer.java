@@ -70,9 +70,9 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer impleme
 		preferences.setDefault(PreferenceStrings.SAVE_BEFORE_COMPILE, true);
 		preferences.setDefault(PreferenceStrings.MARK_SELECTION_OCCURENCES, true);
 		preferences.setDefault(PreferenceStrings.VERILOG_AMS, false);
-		preferences.setDefault(PreferenceStrings.COMPILE_COMMAND, "vcom %p%f");
+		preferences.setDefault(PreferenceStrings.COMPILE_COMMAND, "ghdl -a -g --ieee=synopsys -fexplicit  %p%f");
 		preferences.setDefault(PreferenceStrings.SYNTH_COMMAND, "vcom -check_synthesis %p%f");
-		preferences.setDefault(PreferenceStrings.COMPILE_FOLDER, "simulation");
+		preferences.setDefault(PreferenceStrings.COMPILE_FOLDER, "work");
 
 		preferences.setDefault(PreferenceStrings.ERROR_PARSER, "1\n");
 

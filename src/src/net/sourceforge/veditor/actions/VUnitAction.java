@@ -23,16 +23,16 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.variables.VariablesPlugin;
 
-public class CompileAction extends AbstractAction
+public class VUnitAction extends AbstractAction
 {
 	protected String commandString = "Compile.command";
 	
-	public CompileAction()
+	public VUnitAction()
 	{
-		super("Compile");
+		super("VUnit");
 	}
 	
-	public CompileAction(String name)
+	public VUnitAction(String name)
 	{
 		super(name);
 	}

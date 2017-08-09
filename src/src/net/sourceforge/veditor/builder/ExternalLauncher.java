@@ -18,158 +18,134 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sourceforge.veditor.VerilogPlugin;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 
 /**
  * Launch child process
+ * 
  * @author tadashi
  */
-public class ExternalLauncher extends Thread
-{
+public class ExternalLauncher extends Thread {
 	private IContainer folder;
 	private String command;
 	private StringBuffer message;
+	private IFile file;
 
-	public ExternalLauncher(IContainer folder, String command)
-	{
+	public ExternalLauncher(IContainer folder, String command, IFile file) {
 		this.folder = folder;
 		this.command = command;
+		this.file = file;
 		message = new StringBuffer();
 	}
-	public void run()
-	{
-		//System.out.println(command);
-		
-		//is the command valid
-		command=command.trim();
-		if(command.equals(""))
-		{
+
+	public void run() {
+		// System.out.println(command);
+
+		// is the command valid
+		command = command.trim();
+		if (command.equals("")) {
 			String msg = "Compile command is empty!";
-			VerilogPlugin.println(msg);	
-		}
-		else{
+			VerilogPlugin.println(msg);
+		} else {
 			File dir = folder.getLocation().toFile();
-			if (!dir.exists())
-			{
-				VerilogPlugin.println("working dir: " + dir.getAbsolutePath()
-						+ " does not exist");
-			}
-			else
-			{
-				if (!dir.isDirectory())
-				{
-					VerilogPlugin.println("working dir: " + dir.getAbsolutePath()
-							+ " is not a directory");
-				}
-				else
-				{
-					if (!dir.canWrite())
-					{
-						VerilogPlugin.println("working dir: "
-								+ dir.getAbsolutePath() + " no write access");
+			if (!dir.exists()) {
+				VerilogPlugin.println("working dir: " + dir.getAbsolutePath() + " does not exist");
+			} else {
+				if (!dir.isDirectory()) {
+					VerilogPlugin.println("working dir: " + dir.getAbsolutePath() + " is not a directory");
+				} else {
+					if (!dir.canWrite()) {
+						VerilogPlugin.println("working dir: " + dir.getAbsolutePath() + " no write access");
 					}
 				}
 			}
-	
+
 			Runtime runtime = Runtime.getRuntime();
-			try
-			{
+			try {
 				Process process = runtime.exec(command, null, dir);
 				MessageThread stderr = new MessageThread(process.getErrorStream());
 				MessageThread stdout = new MessageThread(process.getInputStream());
 				stderr.start();
 				stdout.start();
-				
-				try
-				{
+
+				try {
 					process.waitFor();
-				}
-				catch (InterruptedException e)
-				{
+				} catch (InterruptedException e) {
 					process.destroy();
 				}
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				String msg = "Runtime error: cannot execute " + command;
 				VerilogPlugin.println(msg);
 			}
 		}
 	}
 
-	public void waitFor()
-	{
+	public void waitFor() {
 		waitFor(0);
 	}
 
-	public void waitFor(int msec)
-	{
-		try
-		{
-			if (msec == 0)
-			{
-				while(isAlive())
-				{
+	public void waitFor(int msec) {
+		try {
+			if (msec == 0) {
+				while (isAlive()) {
 					join(500);
 				}
-			}
-			else
-			{
-				if (isAlive())
-				{
+			} else {
+				if (isAlive()) {
 					join(msec);
 				}
 			}
-		}
-		catch (InterruptedException e)
-		{
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public String getMessage()
-	{
+
+	public String getMessage() {
 		return message.toString();
 	}
-	
-	private class MessageThread extends Thread
-	{
+
+	private class MessageThread extends Thread {
 		private Reader reader;
 
-		public MessageThread(InputStream is)
-		{
+		public MessageThread(InputStream is) {
 			reader = new InputStreamReader(new BufferedInputStream(is));
 		}
 
-		public void run()
-		{
+		public void run() {
 			int c;
 			StringBuffer buffer = new StringBuffer();
-			try
-			{
+			Pattern pattern = Pattern.compile("([^:]*):([0-9]+):([0-9]+):(.*)$");
+			try {
 				c = reader.read();
-				while (c != -1)
-				{
-					if (c == '\n')
-					{
+				while (c != -1) {
+					if (c == '\n') {
 						VerilogPlugin.println(buffer.toString());
 						message.append(buffer);
 						message.append('\n');
 						buffer.setLength(0);
-					}
-					else
+
+						if (file != null) {
+							Matcher matcher = pattern.matcher(message);
+							if (matcher.find()) {
+								matcher.group(1);
+								int line = Integer.parseInt(matcher.group(2));
+								matcher.group(3);
+								
+								VerilogPlugin.setExternalProblemMarker(file, 2, line, matcher.group(4));
+							}
+						}
+					} else
 						buffer.append((char) c);
 					c = reader.read();
 				}
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 			}
 		}
 	}
 }
-
-

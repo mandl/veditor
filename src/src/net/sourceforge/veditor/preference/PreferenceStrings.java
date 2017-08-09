@@ -92,9 +92,12 @@ public interface PreferenceStrings {
 	public static final String VERILOG_AMS = "VerilogAms";
 	public static final String SAVE_BEFORE_COMPILE = "Compile.SaveBeforeCompile";
 	public static final String COMPILE_COMMAND = "Compile.command";
+	public static final String VUNIT_COMMAND = "VUnit.command";
 	public static final String SYNTH_COMMAND = "Synthesize.command";
 	public static final String COMPILE_FOLDER = "Compile.Folder";
 	public static final String ERROR_PARSER = "ErrorParser";
+	
+	
 
 	public static final String SEMANTIC_WARNING = "Warning";
 	public static final String WARNING_UNRESOLVED = "Warning.unresolvedSignal";

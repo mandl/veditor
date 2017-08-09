@@ -146,6 +146,34 @@ end architecture Test;
 	name="std_logic_vector"
     id="net.sourceforge.veditor.templates.vhdl.std_logic_vector"
 >std_logic_vector(${cursor} downto 0);</template>
+<template 
+	autoinsert="true" 
+	context="net.sourceforge.veditor.templates.vhdl.context.global" 
+	deleted="false" 
+	description="Insert an initialized std_logic_vector"
+	id="net.sourceforge.veditor.templates.vhdl.std_logic_vector_init" 
+	enabled="true" 
+	name="std_logic_vector_init"
+>std_logic_vector(${cursor} downto 0) := (others => '0');
+</template>
+<template
+	autoinsert="true"
+	context="net.sourceforge.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="unsigned"
+    id="net.sourceforge.veditor.templates.vhdl.unsigned"
+>unsigned(${cursor} downto 0);</template>
+<template
+	autoinsert="true"
+	context="net.sourceforge.veditor.templates.vhdl.context.global"
+	deleted="false"
+	description=""
+	enabled="true"
+	name="unsigned"
+    id="net.sourceforge.veditor.templates.vhdl.std_logic_vector"
+>unsigned(${cursor} downto 0);</template>
 
 <template
 	autoinsert="true"
@@ -156,8 +184,6 @@ end architecture Test;
 	name="conv_std_logic_vector"
     id="net.sourceforge.veditor.templates.vhdl.conv_std_logic_vector"
 >conv_std_logic_vector(${cursor},${size});</template>
-
-
 <template
 	autoinsert="true"
 	context="net.sourceforge.veditor.templates.vhdl.context.global"

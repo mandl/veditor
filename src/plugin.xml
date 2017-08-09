@@ -445,14 +445,47 @@
       <file-association 
        content-type="net.sourceforge.veditor.vhdlSource"
        file-extensions="vhdl"/>
-    </extension>    
+    </extension>  
+      
     <extension point="org.eclipse.core.runtime.contentTypes"> 
       <file-association 
        content-type="net.sourceforge.veditor.simulationLog"
        file-extensions="log"/>
     </extension>
     
-     <extension
+     <extension point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            file-extensions="ucf"
+            base-type="org.eclipse.core.runtime.text"
+            name="User Constraint File"
+            id="ucf.project">
+      </content-type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editorContentTypeBinding
+            contentTypeId="ucf.project"
+            editorId="org.eclipse.ui.genericeditor.GenericEditor">
+      </editorContentTypeBinding>
+   </extension>
+   <extension
+         point="org.eclipse.ui.genericeditor.presentationReconcilers">
+      <presentationReconciler
+            class="net.sourceforge.veditor.editor.UCFReconciler"
+            contentType="ucf.project">
+      </presentationReconciler>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.genericeditor.contentAssistProcessors">
+      <contentAssistProcessor
+            class="net.sourceforge.veditor.editor.UCFContentAssistProcessor"
+            contentType="ucf.project">
+      </contentAssistProcessor>
+   </extension>
+   
+  
+    <extension
        id="autotaskmarker"
        name="%extension.name.1"
        point="org.eclipse.core.resources.markers">
