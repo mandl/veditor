@@ -5,11 +5,11 @@
       version="1.1.4"
       provider-name="VEditor Development Team">
 
-   <description url="http://veditor.sourceforge.net">
+   <description url="https://sourceforge.net/projects/veditor/">
       VEditor is a Verilog/VHDL editor for the Eclipse IDE. It provides
-  Verilog(IEEE-1364) and VHDL language specific code viewer, contents
-  outline, code assist etc. It helps coding and debugging in hardware
-  development based on Verilog or VHDL.
+Verilog(IEEE-1364) and VHDL language specific code viewer, contents
+outline, code assist etc. It helps coding and debugging in hardware
+development based on Verilog or VHDL.
    </description>
 
    <copyright url="http://www.eclipse.org/legal/epl-v10.html">
@@ -35,5 +35,12 @@
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="veditor-doc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
