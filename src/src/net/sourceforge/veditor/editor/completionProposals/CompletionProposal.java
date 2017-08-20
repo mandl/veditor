@@ -44,7 +44,8 @@ public class CompletionProposal implements IComparableCompletionProposal
 	}
 	public String getAdditionalProposalInfo()
 	{
-		return null;
+		
+		return replace;
 	}
 	public Image getImage()
 	{
@@ -54,6 +55,7 @@ public class CompletionProposal implements IComparableCompletionProposal
 	{
 		return null;
 	}
+	
 	public String toString()
 	{
 		return getDisplayString();

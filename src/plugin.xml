@@ -466,6 +466,7 @@
       <editorContentTypeBinding
             contentTypeId="ucf.project"
             editorId="org.eclipse.ui.genericeditor.GenericEditor">
+            
       </editorContentTypeBinding>
    </extension>
    <extension

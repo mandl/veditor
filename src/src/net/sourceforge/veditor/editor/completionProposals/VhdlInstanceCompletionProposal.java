@@ -166,4 +166,10 @@ public class VhdlInstanceCompletionProposal extends
 			return m_Element.getName();
 		}
 	}
+	
+	public String getAdditionalProposalInfo()
+	{
+		
+		return getReplaceString();
+	}
 }

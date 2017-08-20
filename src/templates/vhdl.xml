@@ -165,15 +165,7 @@ end architecture Test;
 	name="unsigned"
     id="net.sourceforge.veditor.templates.vhdl.unsigned"
 >unsigned(${cursor} downto 0);</template>
-<template
-	autoinsert="true"
-	context="net.sourceforge.veditor.templates.vhdl.context.global"
-	deleted="false"
-	description=""
-	enabled="true"
-	name="unsigned"
-    id="net.sourceforge.veditor.templates.vhdl.std_logic_vector"
->unsigned(${cursor} downto 0);</template>
+
 
 <template
 	autoinsert="true"
@@ -446,6 +438,82 @@ begin
 
 end arch;
 
+</template>
+
+<template
+	autoinsert="false"
+	context="net.sourceforge.veditor.templates.vhdl.context.newfile"
+	deleted="false"
+	description="This is a special template that is used to create a new VUNIT testbench"
+	enabled="true"
+	id="net.sourceforge.veditor.templates.vhdl.newtestbench"
+	name="VUNIT Testbench"
+>--------------------------------------------------------------------------------
+-- Entity: ${modulename}
+-- Date:${year}-${month}-${day}  
+-- Author: ${user}     
+--
+-- Description: ${brief}
+--------------------------------------------------------------------------------
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+library vunit_lib;
+context vunit_lib.vunit_context;
+
+
+
+entity ${modulename} is
+  generic (
+    runner_cfg : string);
+end entity;
+
+architecture tb of ${modulename} is
+  
+  constant clk_period : integer := 20; -- ns
+  
+
+  signal clk : std_logic := '0';
+  signal rx : std_logic := '1';
+  
+begin
+
+  main : process
+    variable filter : log_filter_t;
+  begin
+    checker_init(display_format => verbose,
+                 file_name => join(output_path(runner_cfg), "error.csv"),
+                 file_format => verbose_csv);
+    logger_init(display_format => verbose,
+                 file_name => join(output_path(runner_cfg), "log.csv"),
+                file_format => verbose_csv);
+    stop_level((debug, verbose), display_handler, filter);
+    test_runner_setup(runner, runner_cfg);
+
+    while test_suite loop
+      reset_checker_stat;
+      if run("test_1") then
+        --your test case
+      elsif run("test_2") then
+        --your test case
+      elsif run("test_3") then
+        --your test case
+      end if;
+    end loop;
+
+    test_runner_cleanup(runner);
+    wait;
+  end process;
+  test_runner_watchdog(runner, 10 ms);
+
+  clk &lt;= not clk after (clk_period/2) * 1 ns;
+ 
+  -- add dut here
+ 
+  
+
+end architecture;
 </template>
 
 </templates>

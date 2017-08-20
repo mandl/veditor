@@ -146,7 +146,7 @@ public class SimulatorPropertyPage extends PropertyPage
 	
 	private void createLower(Composite parent){
 		final int labelWidth=100;
-		final int textWidth=100;
+		final int textWidth=400;
 		Label label;
 		Button button;
 		

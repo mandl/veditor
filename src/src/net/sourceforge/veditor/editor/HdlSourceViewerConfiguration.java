@@ -30,6 +30,8 @@ import net.sourceforge.veditor.parser.vhdl.VhdlOutlineElementFactory.PackageDecl
 import net.sourceforge.veditor.parser.vhdl.VhdlOutlineElementFactory.VhdlOutlineElement;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -48,6 +50,7 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 /**
@@ -259,7 +262,14 @@ abstract public class HdlSourceViewerConfiguration extends
 				.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
 		assistant
 				.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+		Color background = JFaceResources.getColorRegistry().get(JFacePreferences.CONTENT_ASSIST_BACKGROUND_COLOR);
+		assistant.setContextInformationPopupBackground(background);
+		assistant.setContextSelectorBackground(background);
 
+		Color foreground = JFaceResources.getColorRegistry().get(JFacePreferences.CONTENT_ASSIST_FOREGROUND_COLOR);
+		assistant.setContextInformationPopupForeground(foreground);
+		assistant.setContextSelectorForeground(foreground);
+		assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
 		return assistant;
 	}
 

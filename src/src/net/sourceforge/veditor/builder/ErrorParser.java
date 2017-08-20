@@ -57,8 +57,13 @@ public class ErrorParser
 		+ "\n" + "FreeHDL"
 		+ "\n" + "(.*):([0-9]+): error: (.*)" 
 		+ "\n" + "(.*):([0-9]+): warning: (.*)" 
+		+ "\n" + ""
+		+ "\n" + "GHDL"
+		//+ "\n" + "([^:]*):([0-9]+):([0-9]+):(.*)" 
+		+ "\n" + "(.*):([0-9]+):([0-9]+):(.*)" 
+		+ "\n" + "WARNING - (.*):(.*)"
 		+ "\n" + "";
-	
+	//"([^:]*):([0-9]+):([0-9]+):(.*)$"	
 	
 	private static final String PREFERENCE_NAME = "ErrorParser";
 	private static ErrorParser[] parsers = null;
@@ -147,13 +152,15 @@ public class ErrorParser
 				{
 					VerilogPlugin.addPatternMatchListener(parse.errParser);
 					VerilogPlugin.addPatternMatchListener(parse.warnParser);
-					VerilogPlugin.addPatternMatchListener(parse.infoParser);
+					if(parse.infoParser != null)
+						VerilogPlugin.addPatternMatchListener(parse.infoParser);
 	}
 				if (parse.getCompilerName().equals(previousCompiler))
 	{
 					VerilogPlugin.removePatternMatchListener(parse.errParser);
 					VerilogPlugin.removePatternMatchListener(parse.warnParser);
-					VerilogPlugin.removePatternMatchListener(parse.infoParser);
+					if(parse.infoParser != null)
+						VerilogPlugin.removePatternMatchListener(parse.infoParser);
 				}
 			}
 			previousCompiler = compiler;
@@ -232,7 +239,8 @@ public class ErrorParser
 		this.infoRegex = infoRegex;
 		errParser = new ConsoleParser(errRegex, IMarker.SEVERITY_ERROR);
 		warnParser = new ConsoleParser(warnRegex, IMarker.SEVERITY_WARNING);
-		infoParser = new ConsoleParser(infoRegex, IMarker.SEVERITY_INFO);
+		if (!infoRegex.isEmpty())
+			infoParser = new ConsoleParser(infoRegex, IMarker.SEVERITY_INFO);
 	}
 	public void setRegex(int num, String regex)
 	{
@@ -326,7 +334,7 @@ public class ErrorParser
 		return test;
 	}
 	
-	public static class ParseErrorString {
+	public static class ParseErrorString extends ParseErrorBase {
 		private String regex;
 		// results of parse(String string);
 		public String filename;
@@ -343,6 +351,7 @@ public class ErrorParser
 		 * Tries to parse string using regex
 		 * @return boolean: parse succeeded
 		 */
+		@Override
 		public boolean parse(String string) {
 			Pattern errPattern = Pattern.compile(regex);
 			Matcher m = errPattern.matcher(string);
@@ -389,6 +398,48 @@ public class ErrorParser
 		}
 	}
 	
+	public static class GHDLParseErrorString extends ParseErrorBase {
+		private String regex;
+		// results of parse(String string);
+	
+		
+		public GHDLParseErrorString(String regexpr) {
+			regex = regexpr;
+		}
+
+		/* (non-Javadoc)
+		 * @see net.sourceforge.veditor.builder.IParseError#parse(java.lang.String)
+		 */
+		@Override
+		public boolean parse(String string) {
+			Pattern errPattern = Pattern.compile(regex);
+			Matcher m = errPattern.matcher(string);
+			if (!m.matches()) return false;
+
+			int groupCount=m.groupCount();
+			if(groupCount < 3) return false;
+		
+			
+				try {
+					linenr = Integer.parseInt(m.group(2));
+					
+				}
+				catch (NumberFormatException e) {
+				}
+	
+			filename = m.group(1);
+	
+			message = m.group(4);
+			
+			startinmatchedstring = m.start(1);
+			endinmatchedstring = m.end(1);
+			
+			return true;
+		}
+		
+
+	}
+	
 	public class ConsoleParser implements IPatternMatchListener {
 		private String regex;
 		private int problemlevel;
@@ -424,7 +475,12 @@ public class ErrorParser
 			String consolecontent = console.getDocument().get();
 			String matchedstring = consolecontent.substring(offset, offset+length);
 			
-			ParseErrorString parser = new ParseErrorString(regex);
+			ParseErrorBase parser;
+			
+			if (compilerName.equals("GHDL"))
+				parser = new GHDLParseErrorString(regex);
+			else
+				parser = new ParseErrorString(regex);
 			boolean success = parser.parse(matchedstring);
 			if (!success) return;
 				

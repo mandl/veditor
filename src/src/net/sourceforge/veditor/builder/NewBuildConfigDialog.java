@@ -45,7 +45,7 @@ public class NewBuildConfigDialog extends Dialog {
 	 */
 	protected Control createDialogArea(Composite parent){
 		final int labelWidth=40;		
-		final int textWidth=260;
+		final int textWidth=360;
 		final int comboWidth=100;
 		final int checkButtonWidth=200;
 		Composite top=createComposite(parent, 1, SWT.NONE);
@@ -53,13 +53,13 @@ public class NewBuildConfigDialog extends Dialog {
 		Composite composite=createComposite(top, 2, SWT.NONE);
 		Label label=new Label(composite,SWT.NONE);
 		label.setText("Name");
-		label.setLayoutData(new GridData(labelWidth,SWT.DEFAULT));		
+		label.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT));		
 		m_Name=new Text(composite,SWT.BORDER | SWT.LEFT);
-		m_Name.setLayoutData(new GridData(textWidth,SWT.DEFAULT));
+		m_Name.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT));
 		
 		Composite radioSection=createComposite(top, 2, SWT.NONE);
 		m_UseDefault=new Button(radioSection,SWT.CHECK);
-		m_UseDefault.setLayoutData(new GridData(checkButtonWidth,SWT.DEFAULT));
+		m_UseDefault.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT));
 		m_UseDefault.setText("Use Default Default Configuration");
 		m_UseDefault.setSelection(true);
 		createNull(radioSection);
@@ -68,7 +68,7 @@ public class NewBuildConfigDialog extends Dialog {
 		label.setLayoutData(new GridData(120,SWT.DEFAULT));
 		
 		m_CopyFrom=new Combo(radioSection,SWT.READ_ONLY);
-		m_CopyFrom.setLayoutData(new GridData(comboWidth,SWT.DEFAULT));
+		m_CopyFrom.setLayoutData(new GridData(SWT.DEFAULT,SWT.DEFAULT));
 		m_CopyFrom.addSelectionListener(new CopyFromListener());
 		//fill the combo
 		for(BuildConfig buildConfig:m_Configs){
