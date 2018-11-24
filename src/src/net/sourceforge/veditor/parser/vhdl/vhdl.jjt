@@ -33,7 +33,9 @@
 
 options
 {
-  // DEBUG_PARSER = true;
+  //DEBUG_PARSER = true;
+  //DEBUG_TOKEN_MANAGER = true;
+  //DEBUG_LOOKAHEAD = true;
   // CHOICE_AMBIGUITY_CHECK=3;
   IGNORE_CASE=false;
   NODE_SCOPE_HOOK=true;
@@ -44,7 +46,7 @@ options
 
 
 /**
- * The parser is instanciated in the file vhdl.java
+ * The parser is instantiated in the file vhdl.java
  */
 PARSER_BEGIN(VhdlParserCore)
 
@@ -139,6 +141,7 @@ TOKEN [IGNORE_CASE] :
   | <CONSTANT:      "constant">
   | <DISCONNECT:    "disconnect">
   | <DOWNTO:        "downto">
+  | <DEFAULT_T:     "default">
   | <ELSE:          "else">
   | <ELSIF:         "elsif">
   | <END:           "end">
@@ -146,6 +149,7 @@ TOKEN [IGNORE_CASE] :
   | <EXIT:          "exit">
   | <FILE:          "file">
   | <FOR:           "for">
+  | <FORCE:         "force">
   | <FUNCTION:      "function">
   | <GENERATE:      "generate">
   | <GENERIC:       "generic">
@@ -179,6 +183,7 @@ TOKEN [IGNORE_CASE] :
   | <OTHERS:        "others">
   | <OUT:           "out">
   | <PACKAGE:       "package">
+  | <PARAMETER:     "parameter">
   | <PORT:          "port">
   | <POSTPONED:     "postponed">
   | <PROCEDURAL:    "procedural">
@@ -192,6 +197,7 @@ TOKEN [IGNORE_CASE] :
   | <REGISTER:      "register">
   | <REJECT:        "reject">
   | <REM:           "rem">
+  | <RELEASE:       "release">
   | <REPORT:        "report">
   | <RETURN:        "return">
   | <ROL:           "rol">
@@ -321,6 +327,8 @@ void actual_designator() #void :
     variable_name()
   | LOOKAHEAD(file_name())
     file_name()
+  | LOOKAHEAD(subtype_indication()) 
+    subtype_indication()
   | <OPEN>
 
   // 1076.1 extensions:
@@ -445,7 +453,11 @@ void architecture_statement() #void :
   | LOOKAHEAD([label() ":"] [<POSTPONED>] <ASSERT>)
     concurrent_assertion_statement()
   | LOOKAHEAD([label() ":"] [<POSTPONED>] conditional_signal_assignment()|
-              [label() ":"] [<POSTPONED>] selected_signal_assignment())
+              [label() ":"] [<POSTPONED>] selected_signal_assignment()   |
+              [label() ":"] [<POSTPONED>] selected_force_assignment()    |
+              [label() ":"] [<POSTPONED>] simple_release_assignment()    |
+              [label() ":"] [<POSTPONED>] simple_force_assignment()      |
+              [label() ":"] [<POSTPONED>] conditional_force_assignment() )
     concurrent_signal_assignment_statement()
   | LOOKAHEAD(instantiation_label() ":" instantiated_unit() )
     component_instantiation_statement()
@@ -821,10 +833,15 @@ void concurrent_signal_assignment_statement() :
 {}
 {
     [ LOOKAHEAD( label() ":") label() ":" ]
-    [ <POSTPONED> ]
-    ( LOOKAHEAD(  target() "<=" options_() conditional_waveforms() ";") 
-        conditional_signal_assignment() 
-      | selected_signal_assignment() )
+    [ <POSTPONED> ]    
+     ( 
+        LOOKAHEAD(  target() "<=" <FORCE> [<IN> | <OUT>] expression() <WHEN> ) conditional_force_assignment()
+      | LOOKAHEAD(  target() "<=" <FORCE> ) simple_force_assignment()        
+      | LOOKAHEAD(  target() "<=" options_() conditional_waveforms() ";") conditional_signal_assignment()
+      | simple_release_assignment()   
+      | LOOKAHEAD( <WITH> expression() <SELECT>  target()  "<=" <FORCE> ) selected_force_assignment()
+      | selected_signal_assignment() 
+     )
 }
 
 
@@ -932,10 +949,25 @@ void constraint() #void :
   | index_constraint()
 }
 
+
+void context_declaration() :
+{}
+{
+  <CONTEXT> identifier() <IS>       
+  	context_clause()
+  <END> [ <CONTEXT> ] [ context_simple_name() ] ";"
+}
+
 void context_clause() :
 {}
 {
-  ( context_item() )*
+    ( LOOKAHEAD(3) context_item() )*
+}
+
+void context_reference() :
+{}
+{
+   <CONTEXT> selected_name() ( "," selected_name() )* ";"
 }
 
 void context_item() #void :
@@ -943,6 +975,7 @@ void context_item() #void :
 {
     library_clause()
   | use_clause()
+  | context_reference()
 }
 
 
@@ -1677,13 +1710,10 @@ void interface_constant_declaration() :
     subtype_indication() [ ":=" static_expression() ]
 }
 
-/**
- * Section 4.3.2:
- */
-void interface_declaration() #void :
+void interface_object_declaration() #void :
 {}
 {
-    LOOKAHEAD(interface_constant_declaration() ) 
+	LOOKAHEAD(interface_constant_declaration() ) 
     interface_constant_declaration()
   | LOOKAHEAD(interface_signal_declaration() )
     interface_signal_declaration()
@@ -1695,6 +1725,72 @@ void interface_declaration() #void :
   /** 1076.1 extensions: */
   | interface_terminal_declaration() 
   | interface_quantity_declaration()
+}
+
+/**
+ * Section 4.3.2:
+ */
+void interface_declaration() #void :
+{}
+{
+	  interface_object_declaration()
+	| interface_type_declaration()
+    | interface_subprogram_declaration()
+    | interface_package_declaration()
+}
+
+/** Section 6.5.3 */
+void interface_type_declaration():
+{}
+{
+	<TYPE> identifier()
+}
+
+/** Section 6.5.4 **/
+void interface_subprogram_declaration():
+{}
+{
+	interface_subprogram_specification() [ <IS>  interface_subprogram_default() ]
+}
+
+void interface_subprogram_specification() :
+{}
+{
+	interface_procedure_specification() | interface_function_specification()
+}
+
+void interface_procedure_specification() :
+{}
+{
+	<PROCEDURE> designator() [ [<PARAMETER>]  "(" formal_parameter_list()  ")" ]
+}
+
+
+void interface_function_specification() :
+{}
+{
+	[<PURE> | <IMPURE>] <FUNCTION> designator() [ [<PARAMETER>]  "(" formal_parameter_list()  ")" ] <RETURN> type_mark()
+}
+
+void interface_subprogram_default() :
+{}
+{
+	subprogram_name() |  "<>"
+}
+
+/** Section 6.5.5 **/
+void interface_package_declaration():
+{}
+{
+	<PACKAGE> identifier() <IS> <NEW>  uninstantiated_package_name() interface_package_generic_map_aspect()
+}
+
+void interface_package_generic_map_aspect():
+{}
+{
+	  LOOKAHEAD(generic_map_aspect())  generic_map_aspect()
+	| LOOKAHEAD(4) <GENERIC> <MAP>  "("  "<>"  ")"
+	| LOOKAHEAD(4) <GENERIC> <MAP> "(" <DEFAULT_T> ")"
 }
 
 
@@ -1781,7 +1877,7 @@ void library_clause() #void :
 
 void library_unit() #void :
 {}
-{   LOOKAHEAD(<ENTITY> | <CONFIGURATION> | <PACKAGE> identifier() )
+{   LOOKAHEAD(<ENTITY> | <CONFIGURATION> | <PACKAGE> identifier() | <CONTEXT>)
     primary_unit()
   | secondary_unit()
 }
@@ -1977,7 +2073,8 @@ void operator_symbol() :
 void options_() :
 {}
 {
-  [ <GUARDED> ] [ delay_mechanism() ]
+  [ <GUARDED> ] 
+  [ delay_mechanism() ] 
 }
 
 
@@ -2178,6 +2275,8 @@ void primary_unit() #void :
 {
     entity_declaration()
   | configuration_declaration()
+  | LOOKAHEAD(<CONTEXT> identifier() <IS>)
+    context_declaration()
   | LOOKAHEAD(<PACKAGE> identifier() <IS> <NEW>)
     package_instantiation_declaration()
   | LOOKAHEAD(<PACKAGE> identifier())
@@ -2502,6 +2601,7 @@ void sequence_of_statements() :
   ( sequential_statement() )*
 }
 
+
 void sequential_statement() #void :
 {}
 {
@@ -2513,6 +2613,10 @@ void sequential_statement() #void :
       assertion_statement()
     | LOOKAHEAD(3)
       report_statement()
+    | LOOKAHEAD(  [ label() ":" ] target() "<=" <FORCE> )
+      simple_force_assignment()
+    | LOOKAHEAD(  [ label() ":" ] target() "<=" <RELEASE> )
+      simple_release_assignment()	
     | LOOKAHEAD(  [ label() ":" ] target() "<=" )
       signal_assignment_statement()
     | LOOKAHEAD(  [ label() ":" ] target() ":=" )
@@ -2573,13 +2677,38 @@ void sign() :
   | "-"
 }
 
+void conditional_force_assignment() :
+{}
+{
+	target() "<=" <FORCE> [ <IN> | <OUT> ] conditional_waveforms() ";"
+}
+
+
+void selected_force_assignment() :
+{}
+{
+	<WITH> expression() <SELECT>
+     target()  "<=" <FORCE> [ <IN> | <OUT> ]  selected_waveforms() ";"
+}
+
+void simple_force_assignment() :
+{}
+{
+  target() "<=" <FORCE> [ <IN> | <OUT> ] expression() ";"
+}
+
+void simple_release_assignment() :
+{}
+{
+  target() "<=" <RELEASE>  [ <IN> | <OUT> ] ";" 
+}
 
 void signal_assignment_statement() :
 {}
-{
-  [ LOOKAHEAD( label() ":") label() ":" ]
-  target() "<=" [ delay_mechanism() ] waveform() ";"
-
+{ 
+ [ LOOKAHEAD( label() ":") label() ":" ] 
+     target() "<=" [ delay_mechanism() ] waveform() ";"
+  
 }
 
 
@@ -3168,6 +3297,13 @@ void attribute_simple_name() #void :
   | <RANGE>
 }
 
+void context_simple_name() #void :
+{}
+{
+  simple_name()
+}
+
+
 void component_simple_name() #void :
 {}
 {
@@ -3305,6 +3441,17 @@ void uninstantiated_package_name() #void :
   name()
 }
 
+void instantiated_package_name() #void :
+{}
+{
+  name()
+}
+
+void subprogram_name() #void :
+{}
+{
+  name()
+}
 
 // 1076.1 extension:
 void record_nature_simple_name() #void :

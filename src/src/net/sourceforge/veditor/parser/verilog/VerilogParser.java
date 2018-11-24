@@ -229,6 +229,19 @@ public class VerilogParser extends VerilogParserCore implements IParser, Prefere
 		}
 	}
 	
+	protected void parameterAssignment(String name, Expression value) {
+		VariableStore.Symbol sym;
+		sym = variableStore.getVariableSymbol(name, generateBlock);
+		if (sym != null) {
+			if (value.isValidInt())
+				sym.setValue(value.intValue());
+			else
+				sym.setValue(value.toString());
+			//sym.setAssigned(ident.beginLine, ident.beginColumn);
+		}
+		
+	}
+	
 	protected void parameterAssignment(Identifier ident, Expression value) {
 		VariableStore.Symbol sym;
 		sym = variableStore.getVariableSymbol(ident.image, generateBlock);
@@ -540,6 +553,7 @@ public class VerilogParser extends VerilogParserCore implements IParser, Prefere
 			}
 		}
 	}
+
 
 	/**
 	 * Evaluate positional port connection.
@@ -901,11 +915,11 @@ public class VerilogParser extends VerilogParserCore implements IParser, Prefere
 		}
 	}
 
-	@Override
-	protected void parameterAssignment(String name, Expression value) {
+	//@Override
+	//protected void parameterAssignment(String name, Expression value) {
 		// TODO Auto-generated method stub
 		
-	}
+	//}
 }
 
 
