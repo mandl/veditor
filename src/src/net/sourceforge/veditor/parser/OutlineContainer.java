@@ -257,7 +257,7 @@ public class OutlineContainer
 			return false;
 		}
 		//if the end line is the same as the elements end line
-		if(line == e.getEndingCol() && col < e.getEndingCol()){
+		if(line == e.getEndingLine() && col < e.getEndingCol()){
 			//then the column must be before the element's end column
 			return true;
 		}

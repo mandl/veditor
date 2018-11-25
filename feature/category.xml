@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/veditorfeature_1.1.4.jar" id="veditorfeature" version="1.1.4">
+      <category name="vhdl_edit"/>
+   </feature>
+   <category-def name="vhdl_edit" label="Vhdl Editor"/>
+</site>

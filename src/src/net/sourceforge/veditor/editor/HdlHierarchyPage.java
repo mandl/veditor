@@ -508,15 +508,20 @@ public class HdlHierarchyPage extends Page implements ISelectionChangedListener,
 	 * utility function for getting OutlineDatabase
 	 */
 	private OutlineDatabase getOutlineDatabase() {
-		IProject project = m_Editor.getHdlDocument().getProject();
-		OutlineDatabase database = null;
-		try {
-			database = (OutlineDatabase) project
-					.getSessionProperty(VerilogPlugin.getOutlineDatabaseId());
-		} catch (CoreException e) {
-			return null;
+		if( m_Editor.getHdlDocument() != null)
+		{	
+			IProject project = m_Editor.getHdlDocument().getProject();
+			OutlineDatabase database = null;
+			try {
+				database = (OutlineDatabase) project
+						.getSessionProperty(VerilogPlugin.getOutlineDatabaseId());
+			} catch (CoreException e) {
+				return null;
+			}
+			return database;
 		}
-		return database;
+		// FIXME
+		return null;
 	}
 	
 	/**

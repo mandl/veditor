@@ -27,10 +27,12 @@ import net.sourceforge.veditor.parser.vhdl.VhdlOutlineElementFactory.PackageDecl
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.e4.core.services.log.Logger;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.ui.PlatformUI;
 
 abstract public class HdlDocument extends Document
 {
@@ -42,6 +44,8 @@ abstract public class HdlDocument extends Document
 	private boolean m_NeedToRefresh;
 	private VariableStore variableStore;
 	private List<IOutlineListener> outlineListeners = new ArrayList<IOutlineListener>();
+	
+	
 
 	public HdlDocument(IProject project, IFile file)
 	{
@@ -69,6 +73,7 @@ abstract public class HdlDocument extends Document
 	public OutlineDatabase getOutlineDatabase(){	
 			OutlineDatabase database = null;
 			IProject project = getProject();
+			// FIXME open an external file
 			if(project != null){
 				try {
 					database = (OutlineDatabase) project
@@ -118,7 +123,12 @@ abstract public class HdlDocument extends Document
 	public boolean refreshOutline() throws HdlParserException{
 		if(m_NeedToRefresh){
 			m_NeedToRefresh=false;
-			getOutlineContainer(false).clear();
+			
+			if(getOutlineContainer(false) != null )
+			{
+				// FIXME
+				getOutlineContainer(false).clear();
+			}
 			IParser parser = createParser(get());
 			VerilogPlugin.deleteMarkers(getFile());
 			try{
@@ -176,8 +186,12 @@ abstract public class HdlDocument extends Document
 	public OutlineElement getElementAt(int documentOffset,boolean doRefresh)  throws BadLocationException, HdlParserException{
 		int line=getLineOfOffset(documentOffset);
 		int col=documentOffset-getLineOffset(line);
+		OutlineContainer container = getOutlineContainer(doRefresh);
+		if(container != null){
+			return container.getLineContext(line, col);
+		}
 		
-		return getOutlineContainer(doRefresh).getLineContext(line, col);
+		return null;
 	}
 	
 	

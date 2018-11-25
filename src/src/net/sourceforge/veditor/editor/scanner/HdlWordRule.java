@@ -11,6 +11,7 @@
 package net.sourceforge.veditor.editor.scanner;
 
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.ui.PlatformUI;
 
 import net.sourceforge.veditor.document.HdlDocument;
 import net.sourceforge.veditor.document.IOutlineListener;
@@ -22,6 +23,7 @@ import net.sourceforge.veditor.parser.OutlineContainer;
 import net.sourceforge.veditor.parser.OutlineElement;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.e4.core.services.log.Logger;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
@@ -40,6 +42,7 @@ public class HdlWordRule extends WordRule {
 	private OutlineListener listener = null;
 	private IFile file = null;
 	private OutlineElement[] modules = null;
+	private Logger logger;
 
 	public HdlWordRule(IWordDetector detector, IToken defaultToken, ColorManager manager) {
 		super(detector, defaultToken);
@@ -50,6 +53,8 @@ public class HdlWordRule extends WordRule {
 		constant = new Token(HdlTextAttribute.CONSTANT.getTextAttribute(manager));
 		reg = new Token(HdlTextAttribute.REG.getTextAttribute(manager));
 		localparam = new Token(HdlTextAttribute.LOCALPARAM.getTextAttribute(manager));
+		logger = PlatformUI.getWorkbench().getService(org.eclipse.e4.core.services.log.Logger.class);
+		
 	}
 
 	@Override
@@ -68,11 +73,20 @@ public class HdlWordRule extends WordRule {
 			try {
 				OutlineContainer container = doc.getOutlineContainer(true);
 				file = doc.getFile();
-				modules = container.getTopLevelElements();
-				if (listener == null) {
-					listener = new OutlineListener();
-					doc.addOutlineListener(listener);
+				// FIXME open external file container == null
+				if(container != null)
+				{	
+					modules = container.getTopLevelElements();
+					if (listener == null) {
+						listener = new OutlineListener();
+						doc.addOutlineListener(listener);
+					}
 				}
+				else
+				{
+					//logger.error("OutlineContainer == null");
+				}
+				
 			} catch (HdlParserException e) {
 				file = null;
 			}
